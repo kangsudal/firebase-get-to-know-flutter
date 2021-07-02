@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "654017332291",
+    "project_id": "lalala-e9884",
+    "storage_bucket": "lalala-e9884.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654017332291:android:95a6251ad97a42f6b500f6",
+        "android_client_info": {
+          "package_name": "com.example.gtk_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "654017332291-uban0hkksuibcpsschdjtptct233602e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnRPk-VyIvyRbHFZoKDj_6PGtVyyr0kHk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "654017332291-uban0hkksuibcpsschdjtptct233602e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
