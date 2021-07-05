@@ -1,5 +1,7 @@
-import 'package:firebase_core/firebase_core.dart'; // new
-import 'package:firebase_auth/firebase_auth.dart'; // new
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart'; // 데이터베이스 연결
+import 'package:firebase_core/firebase_core.dart'; // firebase 필수
+import 'package:firebase_auth/firebase_auth.dart'; // 인증
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart'; // new
@@ -73,6 +75,20 @@ class HomePage extends StatelessWidget {
           const Header("What we'll be doing"),
           const Paragraph(
             'Join us for a day full of Firebase Workshops and Pizza!',
+          ),
+          Consumer<ApplicationState>(
+            builder: (context, appState, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (appState.loginState == ApplicationLoginState.loggedIn) ...[
+                  Header('Discussion'),
+                  GuestBook(
+                    addMessage: (String message) =>
+                        appState.addMessageToGuestBook(message),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -161,5 +177,77 @@ class ApplicationState extends ChangeNotifier {
 
   void signOut() {
     FirebaseAuth.instance.signOut();
+  }
+
+  Future<DocumentReference> addMessageToGuestBook(String message) {
+    //SEND 버튼을 클릭하면 guestbook 컬렉션에 자동생성된 새 문서에 message가 추가된다.
+    if (_loginState != ApplicationLoginState.loggedIn) {
+      throw Exception('Must be logged in');
+    }
+    CollectionReference guestbook =
+        FirebaseFirestore.instance.collection('guestbook');
+    return guestbook.add(<String, dynamic>{
+      'text': message,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'name': FirebaseAuth.instance.currentUser!.displayName,
+      'userId': FirebaseAuth.instance.currentUser!.uid,
+    });
+  }
+} //ApplicationState
+
+class GuestBook extends StatefulWidget {
+  GuestBook({required this.addMessage});
+  final FutureOr<void> Function(String message) addMessage;
+
+  @override
+  _GuestBookState createState() => _GuestBookState();
+}
+
+class _GuestBookState extends State<GuestBook> {
+  final _formKey = GlobalKey<FormState>(debugLabel: '_GuestBookState');
+  final _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Form(
+        key: _formKey,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _controller,
+                decoration: const InputDecoration(
+                  hintText: 'Leave a message',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter your message to continue';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            SizedBox(width: 8),
+            StyledButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  await widget.addMessage(_controller.text);
+                  _controller.clear();
+                }
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.send),
+                  SizedBox(width: 4),
+                  Text('SEND'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
